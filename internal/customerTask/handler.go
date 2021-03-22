@@ -2,6 +2,7 @@ package customerTask
 
 import (
 	"encoding/json"
+	"github.com/atulsinha007/uber/internal/address"
 	handler "github.com/atulsinha007/uber/pkg/http-wrapper"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -47,11 +48,18 @@ func (h *Handler) UpdateRideStops(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid customerTaskId")
 	}
 
-	updateRideReq := UpdateRideReq{
-		CustomerTaskId: customerTaskId,
+	var stops []address.Location
+	err := json.NewDecoder(req.Body).Decode(&stops)
+	if err != nil {
+		return handler.BadRequest("invalid payload")
 	}
 
-	err := h.ctrl.UpdateRide(updateRideReq)
+	updateRideReq := UpdateRideReq{
+		CustomerTaskId: customerTaskId,
+		Stops:          stops,
+	}
+
+	err = h.ctrl.UpdateRide(updateRideReq)
 	if err != nil {
 		return handler.Response{
 			Code: http.StatusInternalServerError,

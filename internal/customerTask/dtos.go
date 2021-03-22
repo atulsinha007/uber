@@ -33,12 +33,7 @@ type CreateRideResponseOnDriverAcceptance struct {
 	ETA            float64          `json:"eta"`
 }
 
-type AcceptRideReq struct {
-	DriverTaskId string
-	DriverId     string
-}
-
 type UpdateRideReq struct {
 	CustomerTaskId string
-
+	Stops          []address.Location
 }
