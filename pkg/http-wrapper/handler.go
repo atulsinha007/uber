@@ -1,11 +1,10 @@
 package handler
 
-
 import (
 	"encoding/json"
+	"github.com/atulsinha007/uber/pkg/log"
+	"go.uber.org/zap"
 	"net/http"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Fields represents JSON
@@ -31,7 +30,7 @@ func Make(
 		res := f(req)
 		JSON, err := json.Marshal(res.Payload)
 		if err != nil {
-			logrus.WithError(err).Fatal("json marshal failed")
+			log.L.With(zap.Error(err)).Error("json marshal failed")
 		}
 
 		w.WriteHeader(res.Code)
@@ -57,19 +56,6 @@ func BadRequest(msg string) Response {
 		http.StatusBadRequest,
 		Fields{"error": msg},
 	}
-}
-
-// deadcode
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-}
-
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
 }
 
 func setupResponse(w *http.ResponseWriter, req *http.Request) {
