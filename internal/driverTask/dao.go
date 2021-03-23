@@ -99,7 +99,7 @@ func (d *DaoImpl) GetFromDriverIdAndCustomerTaskId(customerTaskId, driverId stri
 
 func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRideType string) (string, error) {
 
-	//query := `select id, current_location from users where preferred`
+	//query := `select id, current_location from users where preferred_ride`
 	return "", nil
 }
 
