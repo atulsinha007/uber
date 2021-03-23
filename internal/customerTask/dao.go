@@ -12,10 +12,11 @@ import (
 )
 
 type Dao interface {
-	CreateRide(createRideReq CreateRideRequest) error
+	CreateRide(createRideReq CreateRideRequest) (string, error)
 	UpdateRide(req UpdateRideReq) error
 	CancelRide(customerTaskId string) error
 	GetHistory(customerId string) ([]CustomerHistoryResponse, error)
+	GetRideDetails(customerTaskId string) (CustomerTask, error)
 }
 
 type DaoImpl struct {
@@ -31,12 +32,12 @@ func NewDaoImpl(conf postgres.PgConf) (*DaoImpl, error) {
 	return &DaoImpl{db: conn}, nil
 }
 
-func (d *DaoImpl) CreateRide(req CreateRideRequest) error {
+func (d *DaoImpl) CreateRide(req CreateRideRequest) (string, error) {
 	tx, err := d.db.Begin()
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
-		return err
+		return "", err
 	}
 
 	defer func() {
@@ -52,7 +53,7 @@ func (d *DaoImpl) CreateRide(req CreateRideRequest) error {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
 		tx.Rollback()
-		return err
+		return "", err
 	}
 
 	var pickupLocId, dropLocId string
@@ -63,7 +64,7 @@ func (d *DaoImpl) CreateRide(req CreateRideRequest) error {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
 		tx.Rollback()
-		return err
+		return "", err
 	}
 
 	err = tx.QueryRow(query, req.DropLocation.Lat, req.DropLocation.Lng, req.DropLocation.Name,
@@ -72,15 +73,15 @@ func (d *DaoImpl) CreateRide(req CreateRideRequest) error {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
 		tx.Rollback()
-		return err
+		return "", err
 	}
 
 	if err = tx.Commit(); err != nil {
 		log.L.With(zap.Error(err)).Error("error creating customer task")
-		return err
+		return "", err
 	}
 
-	return d.createRideStops(customerTaskId, pickupLocId, dropLocId)
+	return customerTaskId, d.createRideStops(customerTaskId, pickupLocId, dropLocId)
 }
 
 func (d *DaoImpl) createRideStops(customerTaskId, pickupLocId, dropLocId string) error {
@@ -120,6 +121,8 @@ func (d *DaoImpl) CancelRide(customerTaskId string) error {
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
 			Error("error cancelling customer task")
+		tx.Rollback()
+		return err
 	}
 
 	query = `update driver_task set status='CANCELLED', updated_at=$1 where customer_task_id=$2`
@@ -128,6 +131,8 @@ func (d *DaoImpl) CancelRide(customerTaskId string) error {
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
 			Error("error cancelling customer task")
+		tx.Rollback()
+		return err
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -138,14 +143,21 @@ func (d *DaoImpl) CancelRide(customerTaskId string) error {
 }
 
 func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, error) {
-	query := `select a.id, a.status, a.payable_amount, a.created_on, b.rating, b.driver_id from customer_task a 
+	query := `select a.id, a.status, a.payable_amount, a.created_at, b.rating, b.driver_id from customer_task a 
     		  INNER JOIN driver_task b on a.id=b.customer_task_id where a.customer_id=$1`
 
 	rows, err := d.db.Query(query, customerId)
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("customerId", customerId)).
 			Error("error getting customer ride history")
+		return nil, err
 	}
+	defer func() {
+		e := rows.Close()
+		if e != nil {
+			log.L.With(zap.Error(e)).Error("error getting customer history")
+		}
+	}()
 
 	var resp []CustomerHistoryResponse
 
@@ -159,6 +171,7 @@ func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, erro
 		if err != nil {
 			log.L.With(zap.Error(err), zap.Any("customerId", customerId)).
 				Error("error scanning row while fetching customer ride history")
+			return nil, err
 		}
 
 		if ratingPtr != nil {
@@ -167,13 +180,23 @@ func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, erro
 			rating = strconv.FormatInt(*ratingPtr, 64)
 		}
 
+		stops, err := d.getRideStops(customerTaskId)
+		if err != nil {
+			return nil, err
+		}
+
+		info, err := d.getDriverInfo(driverId)
+		if err != nil {
+			return nil, err
+		}
+
 		resp = append(resp, CustomerHistoryResponse{
 			RideId:        customerTaskId,
-			RideStops:     d.getRideStops(customerTaskId),
+			RideStops:     stops,
 			Status:        customerTaskStatus,
 			PayableAmount: payableAmount,
 			PaymentStatus: "done",
-			DriverInfo:    d.getDriverInfo(driverId),
+			DriverInfo:    info,
 			RatingGiven:   rating,
 			DateOfJourney: createdOn.Format(time.RFC850),
 		})
@@ -183,28 +206,40 @@ func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, erro
 	return resp, nil
 }
 
-func (d *DaoImpl) getDriverInfo(driverId string) DriverInfo {
+func (d *DaoImpl) getDriverInfo(driverId string) (DriverInfo, error) {
 	query := `select first_name, last_name, phone from users where driver_id=$1`
 
 	rows, err := d.db.Query(query, driverId)
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("driverId", driverId)).
 			Error("error getting driver details")
+		return DriverInfo{}, err
 	}
+	defer func() {
+		e := rows.Close()
+		if e != nil {
+			log.L.With(zap.Error(e)).Error("error getting driver details")
+		}
+	}()
 
 	var info DriverInfo
 	var firstName, lastName string
 
 	for rows.Next() {
 		err = rows.Scan(&firstName, &lastName, &info.PhoneNo)
+		if err != nil {
+			log.L.With(zap.Error(err), zap.Any("driverId", driverId)).
+				Error("error getting driver details")
+			return DriverInfo{}, err
+		}
 	}
 
 	info.Name = firstName + " " + lastName
 
-	return info
+	return info, nil
 }
 
-func (d *DaoImpl) getRideStops(customerTaskId string) []address.Location {
+func (d *DaoImpl) getRideStops(customerTaskId string) ([]address.Location, error) {
 	query := `select a.lat, a.lng, a.name, a.landmark, a.street_name, a.city, a.country from address a 
     		  inner join ride_stops b on a.id=b.location_id where b.customer_task_id=$1 order by b.id `
 
@@ -212,7 +247,14 @@ func (d *DaoImpl) getRideStops(customerTaskId string) []address.Location {
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
 			Error("error getting ride stops details")
+		return nil, err
 	}
+	defer func() {
+		e := rows.Close()
+		if e != nil {
+			log.L.With(zap.Error(e)).Error("error getting ride stops details")
+		}
+	}()
 
 	var stops []address.Location
 
@@ -222,9 +264,40 @@ func (d *DaoImpl) getRideStops(customerTaskId string) []address.Location {
 		if err != nil {
 			log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
 				Error("error scanning stop")
+			return nil, err
 		}
 		stops = append(stops, loc)
 	}
 
-	return stops
+	return stops, nil
+}
+
+func (d *DaoImpl) GetRideDetails(customerTaskId string) (CustomerTask, error) {
+	query := `select status, payable_amount, ride_type, customer_id from customer_task where id=$1`
+
+	rows, err := d.db.Query(query, customerTaskId)
+	if err != nil {
+		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
+			Error("error getting customer ride history")
+		return CustomerTask{}, err
+	}
+	defer func() {
+		e := rows.Close()
+		if e != nil {
+			log.L.With(zap.Error(e)).Error("error getting ride details")
+		}
+	}()
+
+	var task CustomerTask
+	for rows.Next() {
+		err = rows.Scan(&task.Status, &task.PayableAmount, &task.RideType, &task.CustomerId)
+		if err != nil {
+			log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
+				Error("error getting ride detailsy")
+			return CustomerTask{}, err
+		}
+	}
+	task.CustomerTaskId = customerTaskId
+
+	return task, nil
 }

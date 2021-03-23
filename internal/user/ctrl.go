@@ -1,21 +1,38 @@
 package user
 
+import "github.com/atulsinha007/uber/internal/vehicle"
+
 type Ctrl interface {
 	AddUser(user User) error
+	AddDriverWithVehicle(driverWithVehicleReq DriverWithVehicleReq) error
 	GetDriverProfile(driverId string) (DriverProfileResponse, error)
 	UpdateLocation(request UpdateCurrentLocationRequest) error
 }
 
 type CtrlImpl struct {
-	dao Dao
+	dao        Dao
+	vehicleDao vehicle.Dao
 }
 
-func NewCtrl(dao Dao) *CtrlImpl {
-	return &CtrlImpl{dao: dao}
+func NewCtrl(dao Dao, vehicleDao vehicle.Dao) *CtrlImpl {
+	return &CtrlImpl{dao: dao, vehicleDao: vehicleDao}
 }
 
 func (c *CtrlImpl) AddUser(user User) error {
-	return c.dao.Set(user)
+	_, err := c.dao.Set(user)
+	return err
+}
+
+func (c *CtrlImpl) AddDriverWithVehicle(driverWithVehicleReq DriverWithVehicleReq) error {
+	id, err := c.vehicleDao.CreateVehicle(vehicle.CreateVehicleRequest{
+		Model:              driverWithVehicleReq.Model,
+		RegistrationNo:     driverWithVehicleReq.RegistrationNo,
+		PermittedRideTypes: driverWithVehicleReq.PermittedRideTypes,
+	})
+	if err != nil {
+		return err
+	}
+	return c.dao.AddDriverWithVehicle(id, CreateUserRequestToUser(driverWithVehicleReq.CreateUserRequest))
 }
 
 func (c *CtrlImpl) GetDriverProfile(driverId string) (DriverProfileResponse, error) {

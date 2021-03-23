@@ -4,6 +4,14 @@ import (
 	"github.com/atulsinha007/uber/internal/address"
 )
 
+type CustomerTask struct {
+	CustomerTaskId string  `json:"customer_task_id"`
+	CustomerId     string  `json:"customer_id"`
+	Status         string  `json:"status"`
+	PayableAmount  float64 `json:"payable_amount"`
+	RideType       string  `json:"ride_type"`
+}
+
 type CustomerHistoryResponse struct {
 	RideId        string             `json:"ride_id"`
 	RideStops     []address.Location `json:"ride_stops"`
