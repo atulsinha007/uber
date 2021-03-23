@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS driver_task
 (
     id               serial PRIMARY KEY,
     customer_task_id int REFERENCES customer_task (id) ON DELETE CASCADE NOT NULL,
-    driver_id        int REFERENCES users (user_id) ON DELETE CASCADE          NOT NULL,
+    driver_id        int REFERENCES users (user_id) ON DELETE CASCADE    NOT NULL,
     payable_amount   float                                               NOT NULL,
     ride_type        varchar(10)                                         NOT NULL,
     status           varchar(10)                                         NOT NULL,

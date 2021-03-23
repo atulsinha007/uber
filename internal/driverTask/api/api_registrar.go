@@ -8,5 +8,7 @@ import (
 func GetEndpoints() []server.Endpoint {
 	return []server.Endpoint{
 		{Path: "/driverTask/{driverId}/history", Method: "POST", Handler: driverTask.ApiHandler.GetDriverHistory},
+		{Path: "/driverTask/{driverTaskId}/accept", Method: "POST", Handler: driverTask.ApiHandler.AcceptRideRequest},
+		{Path: "/driverTask/{driverTaskId}/update", Method: "PATCH", Handler: driverTask.ApiHandler.UpdateRide},
 	}
 }

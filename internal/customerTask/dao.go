@@ -12,11 +12,11 @@ import (
 )
 
 type Dao interface {
-	CreateRide(createRideReq CreateRideRequest) (string, error)
+	CreateRide(createRideReq CreateRideRequest) (int, error)
 	UpdateRide(req UpdateRideReq) error
-	CancelRide(customerTaskId string) error
-	GetHistory(customerId string) ([]CustomerHistoryResponse, error)
-	GetRideDetails(customerTaskId string) (CustomerTask, error)
+	CancelRide(customerTaskId int) error
+	GetHistory(customerId int) ([]CustomerHistoryResponse, error)
+	GetRideDetails(customerTaskId int) (CustomerTask, error)
 }
 
 type DaoImpl struct {
@@ -32,12 +32,12 @@ func NewDaoImpl(conf postgres.PgConf) (*DaoImpl, error) {
 	return &DaoImpl{db: conn}, nil
 }
 
-func (d *DaoImpl) CreateRide(req CreateRideRequest) (string, error) {
+func (d *DaoImpl) CreateRide(req CreateRideRequest) (int, error) {
 	tx, err := d.db.Begin()
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
-		return "", err
+		return 0, err
 	}
 
 	defer func() {
@@ -46,14 +46,14 @@ func (d *DaoImpl) CreateRide(req CreateRideRequest) (string, error) {
 		}
 	}()
 
-	var customerTaskId string
+	var customerTaskId int
 	query := `insert into customer_task(customer_id, payable_amount, ride_type, status) values($1, $2, $3, $4) returning id;`
 	err = tx.QueryRow(query, req.CustomerId, req.PayableAmount, req.PreferredRideType, "CREATED").Scan(&customerTaskId)
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
 		tx.Rollback()
-		return "", err
+		return 0, err
 	}
 
 	var pickupLocId, dropLocId string
@@ -64,7 +64,7 @@ func (d *DaoImpl) CreateRide(req CreateRideRequest) (string, error) {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
 		tx.Rollback()
-		return "", err
+		return 0, err
 	}
 
 	err = tx.QueryRow(query, req.DropLocation.Lat, req.DropLocation.Lng, req.DropLocation.Name,
@@ -73,18 +73,18 @@ func (d *DaoImpl) CreateRide(req CreateRideRequest) (string, error) {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", req)).
 			Error("error creating customer task")
 		tx.Rollback()
-		return "", err
+		return 0, err
 	}
 
 	if err = tx.Commit(); err != nil {
 		log.L.With(zap.Error(err)).Error("error creating customer task")
-		return "", err
+		return 0, err
 	}
 
 	return customerTaskId, d.createRideStops(customerTaskId, pickupLocId, dropLocId)
 }
 
-func (d *DaoImpl) createRideStops(customerTaskId, pickupLocId, dropLocId string) error {
+func (d *DaoImpl) createRideStops(customerTaskId int, pickupLocId, dropLocId string) error {
 	query := `insert into ride_stops(customer_task_id, location_id, prev_location_id, next_location_id) 
 			  values ($1, $2, $3, $4), ($5, $6, $7, $8);`
 
@@ -101,7 +101,7 @@ func (d *DaoImpl) UpdateRide(req UpdateRideReq) error {
 	return nil
 }
 
-func (d *DaoImpl) CancelRide(customerTaskId string) error {
+func (d *DaoImpl) CancelRide(customerTaskId int) error {
 	tx, err := d.db.Begin()
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
@@ -115,7 +115,7 @@ func (d *DaoImpl) CancelRide(customerTaskId string) error {
 		}
 	}()
 
-	query := `update customer_task set status='CANCELLED', updated_at=$1 where id=$2`
+	query := `update customer_task set status='CANCELLED', updated_at=$1 where id=$2 and status='CREATED'`
 
 	_, err = tx.Exec(query, time.Now().UTC(), customerTaskId)
 	if err != nil {
@@ -142,7 +142,7 @@ func (d *DaoImpl) CancelRide(customerTaskId string) error {
 	return err
 }
 
-func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, error) {
+func (d *DaoImpl) GetHistory(customerId int) ([]CustomerHistoryResponse, error) {
 	query := `select a.id, a.status, a.payable_amount, a.created_at, b.rating, b.driver_id from customer_task a 
     		  INNER JOIN driver_task b on a.id=b.customer_task_id where a.customer_id=$1`
 
@@ -162,7 +162,8 @@ func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, erro
 	var resp []CustomerHistoryResponse
 
 	for rows.Next() {
-		var customerTaskId, customerTaskStatus, driverId, rating string
+		var customerTaskId, driverId int
+		var customerTaskStatus, rating string
 		var createdOn time.Time
 		var payableAmount float64
 		var ratingPtr *int64
@@ -174,7 +175,7 @@ func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, erro
 			return nil, err
 		}
 
-		if ratingPtr != nil {
+		if ratingPtr == nil {
 			rating = "null"
 		} else {
 			rating = strconv.FormatInt(*ratingPtr, 64)
@@ -206,8 +207,8 @@ func (d *DaoImpl) GetHistory(customerId string) ([]CustomerHistoryResponse, erro
 	return resp, nil
 }
 
-func (d *DaoImpl) getDriverInfo(driverId string) (DriverInfo, error) {
-	query := `select first_name, last_name, phone from users where driver_id=$1`
+func (d *DaoImpl) getDriverInfo(driverId int) (DriverInfo, error) {
+	query := `select first_name, last_name, phone from users where user_id=$1`
 
 	rows, err := d.db.Query(query, driverId)
 	if err != nil {
@@ -239,8 +240,8 @@ func (d *DaoImpl) getDriverInfo(driverId string) (DriverInfo, error) {
 	return info, nil
 }
 
-func (d *DaoImpl) getRideStops(customerTaskId string) ([]address.Location, error) {
-	query := `select a.lat, a.lng, a.name, a.landmark, a.street_name, a.city, a.country from address a 
+func (d *DaoImpl) getRideStops(customerTaskId int) ([]address.Location, error) {
+	query := `select a.lat, a.lng, a.house_name, a.landmark, a.street_name, a.city, a.country from address a 
     		  inner join ride_stops b on a.id=b.location_id where b.customer_task_id=$1 order by b.id `
 
 	rows, err := d.db.Query(query, customerTaskId)
@@ -272,7 +273,7 @@ func (d *DaoImpl) getRideStops(customerTaskId string) ([]address.Location, error
 	return stops, nil
 }
 
-func (d *DaoImpl) GetRideDetails(customerTaskId string) (CustomerTask, error) {
+func (d *DaoImpl) GetRideDetails(customerTaskId int) (CustomerTask, error) {
 	query := `select status, payable_amount, ride_type, customer_id from customer_task where id=$1`
 
 	rows, err := d.db.Query(query, customerTaskId)

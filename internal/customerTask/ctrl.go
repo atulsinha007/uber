@@ -13,9 +13,9 @@ import (
 type Ctrl interface {
 	CreateRide(createRideReq CreateRideRequest) (CreateRideResponseOnDriverAcceptance, error)
 	UpdateRide(req UpdateRideReq) error
-	CancelRide(customerTaskId string) error
-	GetHistory(customerId string) ([]CustomerHistoryResponse, error)
-	AssignNearestDriver(customerTaskId string, pickupLocation address.Location, preferredRideType string) (string, error)
+	CancelRide(customerTaskId int) error
+	GetHistory(customerId int) ([]CustomerHistoryResponse, error)
+	AssignNearestDriver(customerTaskId int, pickupLocation address.Location, preferredRideType string) (int, error)
 }
 
 type CtrlImpl struct {
@@ -35,31 +35,42 @@ func (c *CtrlImpl) CreateRide(req CreateRideRequest) (resp CreateRideResponseOnD
 
 	// assign nearby driver
 
-	var driverId string
+	assigned := false
+	var driverId int
 	for i := 0; i < 5; i++ { // there should be psuedo-infinite tries for assignment
 		driverId, err = c.AssignNearestDriver(customerTaskId, req.PickupLocation, req.PreferredRideType)
 		if err != nil {
 			log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
 				Error("error finding nearest driver")
-		} else {
-			break
+			continue
 		}
-	}
-
-	assigned := false
-	for i := 0; i < 120; i++ { // this should be handled by some non-blocking approach
-		time.Sleep(time.Second)
-		assigned, resp = c.checkIfDriverAccepted(customerTaskId, driverId)
+		assigned = true
+		break
 	}
 
 	if !assigned {
 		return CreateRideResponseOnDriverAcceptance{}, nil
 	}
 
+	accepted := false
+	for i := 0; i < 120; i++ { // this should be handled by some non-blocking approach
+		time.Sleep(time.Second)
+		accepted, resp = c.checkIfDriverAccepted(customerTaskId, driverId, req.PickupLocation)
+		if accepted {
+			break
+		}
+	}
+
+	if !accepted {
+		return CreateRideResponseOnDriverAcceptance{}, nil
+	}
+
 	return resp, nil
 }
 
-func (c *CtrlImpl) checkIfDriverAccepted(customerTaskId, driverId string) (assigned bool, resp CreateRideResponseOnDriverAcceptance) {
+func (c *CtrlImpl) checkIfDriverAccepted(customerTaskId, driverId int, pickupLoc address.Location) (
+	assigned bool, resp CreateRideResponseOnDriverAcceptance) {
+
 	task, err := c.driverTaskDao.GetFromDriverIdAndCustomerTaskId(customerTaskId, driverId)
 	if err != nil {
 		return false, CreateRideResponseOnDriverAcceptance{}
@@ -70,7 +81,7 @@ func (c *CtrlImpl) checkIfDriverAccepted(customerTaskId, driverId string) (assig
 	}
 
 	return true, CreateRideResponseOnDriverAcceptance{
-		PickupLocation: address.Location{},
+		PickupLocation: pickupLoc,
 		ETA:            100, // some algorithm should decide ETA
 	}
 }
@@ -79,12 +90,12 @@ func (c *CtrlImpl) UpdateRide(req UpdateRideReq) error {
 	return c.customerTaskDao.UpdateRide(req)
 }
 
-func (c *CtrlImpl) CancelRide(customerTaskId string) error {
+func (c *CtrlImpl) CancelRide(customerTaskId int) error {
 	return c.customerTaskDao.CancelRide(customerTaskId)
 }
 
-func (c *CtrlImpl) GetHistory(driverId string) ([]CustomerHistoryResponse, error) {
-	history, err := c.customerTaskDao.GetHistory(driverId)
+func (c *CtrlImpl) GetHistory(customerId int) ([]CustomerHistoryResponse, error) {
+	history, err := c.customerTaskDao.GetHistory(customerId)
 	if err != nil {
 		return nil, err
 	}
@@ -96,15 +107,25 @@ func (c *CtrlImpl) GetHistory(driverId string) ([]CustomerHistoryResponse, error
 	return history, nil
 }
 
-func (c *CtrlImpl) AssignNearestDriver(customerTaskId string, pickupLocation address.Location, preferredRideType string) (string, error) {
-	// find nearest driver
-	//driver, err := c.driverTaskDao.FindNearestDriver(pickupLocation, preferredRideType)
-	//if err != nil {
-	//	log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
-	//		Error("error finding nearest driver")
-	//	return "", err
-	//}
+func (c *CtrlImpl) AssignNearestDriver(customerTaskId int, pickupLocation address.Location, preferredRideType string) (int, error) {
+	driverId, distance, err := c.driverTaskDao.FindNearestDriver(pickupLocation, preferredRideType)
+	if err != nil {
+		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
+			Error("error finding nearest driver")
+		return 0, err
+	}
 
-	// assign
-	return "", nil
+	err = c.driverTaskDao.CreateDriverTask(driverTask.DriverTask{
+		CustomerTaskId: customerTaskId,
+		DriverId:       driverId,
+		Status:         "CREATED",
+		PayableAmount:  distance, // let's take amount=distance for now
+		RideType:       preferredRideType,
+		Distance:       distance,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return driverId, nil
 }

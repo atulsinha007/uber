@@ -6,6 +6,7 @@ import (
 	handler "github.com/atulsinha007/uber/pkg/http-wrapper"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -48,6 +49,8 @@ func (h *Handler) UpdateRideStops(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid customerTaskId")
 	}
 
+	id, _ := strconv.Atoi(customerTaskId)
+
 	var stops []address.Location
 	err := json.NewDecoder(req.Body).Decode(&stops)
 	if err != nil {
@@ -55,7 +58,7 @@ func (h *Handler) UpdateRideStops(req *http.Request) handler.Response {
 	}
 
 	updateRideReq := UpdateRideReq{
-		CustomerTaskId: customerTaskId,
+		CustomerTaskId: id,
 		Stops:          stops,
 	}
 
@@ -83,7 +86,9 @@ func (h *Handler) CancelRide(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid customerTaskId")
 	}
 
-	err := h.ctrl.CancelRide(customerTaskId)
+	id, _ := strconv.Atoi(customerTaskId)
+
+	err := h.ctrl.CancelRide(id)
 	if err != nil {
 		return handler.Response{
 			Code: http.StatusInternalServerError,
@@ -107,7 +112,9 @@ func (h *Handler) GetCustomerHistory(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid customerId")
 	}
 
-	resp, err := h.ctrl.GetHistory(customerId)
+	id, _ := strconv.Atoi(customerId)
+
+	resp, err := h.ctrl.GetHistory(id)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return handler.Response{

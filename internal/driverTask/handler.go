@@ -1,9 +1,11 @@
 package driverTask
 
 import (
+	"encoding/json"
 	handler "github.com/atulsinha007/uber/pkg/http-wrapper"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -20,7 +22,8 @@ func (h *Handler) GetDriverHistory(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid driverId")
 	}
 
-	resp, err := h.ctrl.GetDriverHistory(driverId)
+	id, _ := strconv.Atoi(driverId)
+	resp, err := h.ctrl.GetDriverHistory(id)
 	if err != nil {
 		return handler.Response{
 			Code: http.StatusInternalServerError,
@@ -34,6 +37,70 @@ func (h *Handler) GetDriverHistory(req *http.Request) handler.Response {
 		Code: http.StatusCreated,
 		Payload: handler.Fields{
 			"data": resp,
+		},
+	}
+}
+
+func (h *Handler) AcceptRideRequest(req *http.Request) handler.Response {
+	driverTaskId, ok := mux.Vars(req)["driverTaskId"]
+	if !ok || driverTaskId == "" {
+		return handler.BadRequest("invalid driverId")
+	}
+
+	var payload AcceptRideReq
+	err := json.NewDecoder(req.Body).Decode(&payload)
+	if err != nil {
+		return handler.BadRequest("invalid payload")
+	}
+
+	payload.DriverTaskId, _ = strconv.Atoi(driverTaskId)
+
+	err = h.ctrl.AcceptRideRequest(payload)
+	if err != nil {
+		return handler.Response{
+			Code: http.StatusInternalServerError,
+			Payload: handler.Fields{
+				"error": err.Error(),
+			},
+		}
+	}
+
+	return handler.Response{
+		Code: http.StatusCreated,
+		Payload: handler.Fields{
+			"data": "ride accepted successfully",
+		},
+	}
+}
+
+func (h *Handler) UpdateRide(req *http.Request) handler.Response {
+	driverTaskId, ok := mux.Vars(req)["driverTaskId"]
+	if !ok || driverTaskId == "" {
+		return handler.BadRequest("invalid driverId")
+	}
+
+	var payload UpdateRideReq
+	err := json.NewDecoder(req.Body).Decode(&payload)
+	if err != nil {
+		return handler.BadRequest("invalid payload")
+	}
+
+	payload.DriverTaskId, _ = strconv.Atoi(driverTaskId)
+
+	err = h.ctrl.UpdateRide(payload)
+	if err != nil {
+		return handler.Response{
+			Code: http.StatusInternalServerError,
+			Payload: handler.Fields{
+				"error": err.Error(),
+			},
+		}
+	}
+
+	return handler.Response{
+		Code: http.StatusCreated,
+		Payload: handler.Fields{
+			"data": "ride accepted successfully",
 		},
 	}
 }

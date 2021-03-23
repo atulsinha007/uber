@@ -17,8 +17,8 @@ func CreateUserRequestToUser(req CreateUserRequest) User {
 }
 
 type VehicleAssignmentRequest struct {
-	DriverId  string
-	VehicleId string
+	DriverId  int
+	VehicleId int
 }
 
 type DriverProfileResponse struct {
@@ -29,11 +29,11 @@ type DriverProfileResponse struct {
 }
 
 type DriverHistoryRequest struct {
-	DriverId string
+	driverId int
 }
 
 type DriverHistoryResponse struct {
-	RideId          string
+	RideId          int
 	Status          string
 	DistanceCovered float64
 	Rating          int
@@ -41,12 +41,12 @@ type DriverHistoryResponse struct {
 }
 
 type UpdateRideRequest struct {
-	DriverTaskId string
+	DriverTaskId int
 	Status       string
 }
 
 type UpdateCurrentLocationRequest struct {
-	UserId      string
+	UserId      int
 	CurLocation LatLng
 }
 

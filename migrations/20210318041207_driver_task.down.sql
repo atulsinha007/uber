@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS driver_task;
+DROP TABLE IF EXISTS driver_task cascade;

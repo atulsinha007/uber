@@ -5,6 +5,7 @@ import (
 	handler "github.com/atulsinha007/uber/pkg/http-wrapper"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -46,7 +47,9 @@ func (h *Handler) GetDriverProfile(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid driverId")
 	}
 
-	resp, err := h.ctrl.GetDriverProfile(driverId)
+	id, _ := strconv.Atoi(driverId)
+
+	resp, err := h.ctrl.GetDriverProfile(id)
 	if err != nil {
 		return handler.Response{
 			Code: http.StatusInternalServerError,
@@ -71,6 +74,8 @@ func (h *Handler) UpdateLocation(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid userId")
 	}
 
+	id, _ := strconv.Atoi(userId)
+
 	var latLng LatLng
 	err := json.NewDecoder(req.Body).Decode(&latLng)
 	if err != nil {
@@ -78,7 +83,7 @@ func (h *Handler) UpdateLocation(req *http.Request) handler.Response {
 	}
 
 	err = h.ctrl.UpdateLocation(UpdateCurrentLocationRequest{
-		UserId:      userId,
+		UserId:      id,
 		CurLocation: latLng,
 	})
 	if err != nil {

@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS customer_task;
+DROP TABLE IF EXISTS customer_task cascade;

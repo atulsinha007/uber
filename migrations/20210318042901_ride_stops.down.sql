@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS ride_stops;
+DROP TABLE IF EXISTS ride_stops cascade;
