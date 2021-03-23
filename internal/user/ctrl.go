@@ -5,7 +5,7 @@ import "github.com/atulsinha007/uber/internal/vehicle"
 type Ctrl interface {
 	AddUser(user User) error
 	AddDriverWithVehicle(driverWithVehicleReq DriverWithVehicleReq) error
-	GetDriverProfile(driverId string) (DriverProfileResponse, error)
+	GetDriverProfile(driverId int) (DriverProfileResponse, error)
 	UpdateLocation(request UpdateCurrentLocationRequest) error
 }
 
@@ -35,7 +35,7 @@ func (c *CtrlImpl) AddDriverWithVehicle(driverWithVehicleReq DriverWithVehicleRe
 	return c.dao.AddDriverWithVehicle(id, CreateUserRequestToUser(driverWithVehicleReq.CreateUserRequest))
 }
 
-func (c *CtrlImpl) GetDriverProfile(driverId string) (DriverProfileResponse, error) {
+func (c *CtrlImpl) GetDriverProfile(driverId int) (DriverProfileResponse, error) {
 	return c.dao.GetDriverProfile(driverId)
 }
 

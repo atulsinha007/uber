@@ -12,7 +12,7 @@ import (
 
 type Dao interface {
 	Set(user User) (string, error)
-	GetDriverProfile(driverId string) (DriverProfileResponse, error)
+	GetDriverProfile(driverId int) (DriverProfileResponse, error)
 	UpdateLocation(req UpdateCurrentLocationRequest) error
 	AddDriverWithVehicle(vehicleId string, user User) error
 }
@@ -42,7 +42,7 @@ func (d *DaoImpl) Set(user User) (string, error) {
 	return id, err
 }
 
-func (d *DaoImpl) GetDriverProfile(driverId string) (profile DriverProfileResponse, err error) {
+func (d *DaoImpl) GetDriverProfile(driverId int) (profile DriverProfileResponse, err error) {
 	query := `select first_name, last_name, phone from users where user_id=$1;`
 
 	var firstName, lastName, phoneNo string

@@ -5,15 +5,15 @@ import (
 )
 
 type CustomerTask struct {
-	CustomerTaskId string  `json:"customer_task_id"`
-	CustomerId     string  `json:"customer_id"`
+	CustomerTaskId int  `json:"customer_task_id"`
+	CustomerId     int  `json:"customer_id"`
 	Status         string  `json:"status"`
 	PayableAmount  float64 `json:"payable_amount"`
 	RideType       string  `json:"ride_type"`
 }
 
 type CustomerHistoryResponse struct {
-	RideId        string             `json:"ride_id"`
+	RideId        int             `json:"ride_id"`
 	RideStops     []address.Location `json:"ride_stops"`
 	Status        string             `json:"status"`
 	PayableAmount float64            `json:"payable_amount"`
@@ -29,7 +29,7 @@ type DriverInfo struct {
 }
 
 type CreateRideRequest struct {
-	CustomerId        string           `json:"customer_id"`
+	CustomerId        int           `json:"customer_id"`
 	PayableAmount     float64          `json:"payable_amount"`
 	PickupLocation    address.Location `json:"pickup_location"`
 	DropLocation      address.Location `json:"drop_location"`
@@ -42,6 +42,6 @@ type CreateRideResponseOnDriverAcceptance struct {
 }
 
 type UpdateRideReq struct {
-	CustomerTaskId string
+	CustomerTaskId int
 	Stops          []address.Location
 }
