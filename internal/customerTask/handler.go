@@ -109,6 +109,14 @@ func (h *Handler) GetCustomerHistory(req *http.Request) handler.Response {
 
 	resp, err := h.ctrl.GetHistory(customerId)
 	if err != nil {
+		if err.Error() == "record not found" {
+			return handler.Response{
+				Code:    http.StatusNotFound,
+				Payload: handler.Fields{
+					"error": err.Error(),
+				},
+			}
+		}
 		return handler.Response{
 			Code: http.StatusInternalServerError,
 			Payload: handler.Fields{

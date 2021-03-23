@@ -97,3 +97,29 @@ func (h *Handler) UpdateLocation(req *http.Request) handler.Response {
 		},
 	}
 }
+
+func (h *Handler) AddDriverWithVehicle(req *http.Request) handler.Response {
+
+	var request DriverWithVehicleReq
+	err := json.NewDecoder(req.Body).Decode(&request)
+	if err != nil {
+		return handler.BadRequest("invalid payload")
+	}
+
+	err = h.ctrl.AddDriverWithVehicle(request)
+	if err != nil {
+		return handler.Response{
+			Code: http.StatusInternalServerError,
+			Payload: handler.Fields{
+				"error": err.Error(),
+			},
+		}
+	}
+
+	return handler.Response{
+		Code: http.StatusCreated,
+		Payload: handler.Fields{
+			"data": "driver with vehicle created successfully",
+		},
+	}
+}

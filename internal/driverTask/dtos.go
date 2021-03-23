@@ -15,5 +15,15 @@ type AcceptRideReq struct {
 
 type UpdateRideReq struct {
 	DriverTaskId string
-	Status     string
+	Status       string
+}
+
+type DriverTask struct {
+	DriverTaskId   string
+	CustomerTaskId string
+	DriverId       string
+	Status         string
+	PayableAmount  float64
+	RideType       string
+	Distance       float64
 }

@@ -11,9 +11,10 @@ import (
 )
 
 type Dao interface {
-	Set(user User) error
+	Set(user User) (string, error)
 	GetDriverProfile(driverId string) (DriverProfileResponse, error)
 	UpdateLocation(req UpdateCurrentLocationRequest) error
+	AddDriverWithVehicle(vehicleId string, user User) error
 }
 
 type DaoImpl struct {
@@ -29,15 +30,16 @@ func NewDaoImpl(conf postgres.PgConf) (*DaoImpl, error) {
 	return &DaoImpl{db: conn}, nil
 }
 
-func (d *DaoImpl) Set(user User) error {
-	query := `insert into users(first_name, last_name, phone, user_type) values($1, $2, $3, $4);`
+func (d *DaoImpl) Set(user User) (string, error) {
+	query := `insert into users(first_name, last_name, phone, user_type) values($1, $2, $3, $4) returning user_id;`
 
-	_, err := d.db.Exec(query, user.FirstName, user.LastName, user.Phone, user.Type)
+	var id string
+	err := d.db.QueryRow(query, user.FirstName, user.LastName, user.Phone, user.Type).Scan(&id)
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("user", user)).Error("error in inserting user")
 	}
 
-	return err
+	return id, err
 }
 
 func (d *DaoImpl) GetDriverProfile(driverId string) (profile DriverProfileResponse, err error) {
@@ -80,5 +82,22 @@ func (d *DaoImpl) UpdateLocation(req UpdateCurrentLocationRequest) error {
 		log.L.With(zap.Error(err), zap.Any("req", req)).Error("error in updating location")
 	}
 
+	return err
+}
+
+func (d *DaoImpl) AddDriverWithVehicle(vehicleId string, user User) error {
+	id, err := d.Set(user)
+	if err != nil {
+		log.L.With(zap.Error(err)).Error("error creating driver with vehicle")
+		return err
+	}
+
+	query := `insert into driver_profile(driver_id, vehicle_id) values($1, $2);`
+
+	_, err = d.db.Exec(query, id, vehicleId)
+	if err != nil {
+		log.L.With(zap.Error(err), zap.Any("vehicleId", vehicleId), zap.Any("user", user)).
+			Error("error creating driver with vehicle")
+	}
 	return err
 }

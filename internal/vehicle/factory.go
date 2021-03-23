@@ -1,7 +1,6 @@
-package user
+package vehicle
 
 import (
-	"github.com/atulsinha007/uber/internal/vehicle"
 	"github.com/atulsinha007/uber/pkg/log"
 	"github.com/atulsinha007/uber/pkg/postgres"
 	"github.com/spf13/viper"
@@ -21,18 +20,12 @@ func Init() {
 		DbName:   viper.GetString("PG_DB_NAME"),
 	}
 
-	userDao, err := NewDaoImpl(pgConf)
-	if err != nil {
-		log.L.With(zap.Error(err)).Fatal("error initializing user dao")
-	}
-	log.L.Info("user dao initialized")
-
-	vehicleDao, err := vehicle.NewDaoImpl(pgConf)
+	vehicleDao, err := NewDaoImpl(pgConf)
 	if err != nil {
 		log.L.With(zap.Error(err)).Fatal("error initializing vehicle dao")
 	}
 	log.L.Info("vehicle dao initialized")
 
-	userCtrl := NewCtrl(userDao, vehicleDao)
+	userCtrl := NewCtrl(vehicleDao)
 	ApiHandler = NewHandler(userCtrl)
 }

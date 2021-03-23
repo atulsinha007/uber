@@ -2,6 +2,7 @@ package driverTask
 
 import (
 	"database/sql"
+	"github.com/atulsinha007/uber/internal/address"
 	"github.com/atulsinha007/uber/pkg/log"
 	"github.com/atulsinha007/uber/pkg/postgres"
 	_ "github.com/lib/pq"
@@ -12,6 +13,9 @@ type Dao interface {
 	GetDriverHistory(driverId string) ([]DriverHistoryResponse, error)
 	AcceptRideRequest(req AcceptRideReq) error
 	UpdateRide(req UpdateRideReq) error
+	GetFromDriverIdAndCustomerTaskId(customerTaskId, driverId string) (DriverTask, error)
+	FindNearestDriver(pickupLocation address.Location, preferredRideType string) (string, error)
+	CreateDriverTask()
 }
 
 type DaoImpl struct {
@@ -73,4 +77,31 @@ func (d *DaoImpl) UpdateRide(req UpdateRideReq) error {
 	}
 
 	return err
+}
+
+func (d *DaoImpl) GetFromDriverIdAndCustomerTaskId(customerTaskId, driverId string) (DriverTask, error) {
+	query := `select id, status, payable_amount, ride_type, distance from driver_task where customerTaskId=$1 and driver_id=$2;`
+
+	var dt DriverTask
+	err := d.db.QueryRow(query, customerTaskId, driverId).Scan(&dt.DriverTaskId, &dt.Status, &dt.PayableAmount,
+		&dt.RideType, &dt.Distance)
+	if err != nil {
+		log.L.With(zap.Error(err), zap.Any("customerTaskId", customerTaskId)).
+			Error("error getting driverTask from customerTaskId")
+		return DriverTask{}, err
+	}
+
+	dt.CustomerTaskId = customerTaskId
+	dt.DriverId = driverId
+
+	return dt, err
+}
+
+func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRideType string) (string, error) {
+	//query := `select id, current_location from users where pre`
+	return "", nil
+}
+
+func (d *DaoImpl) CreateDriverTask() {
+
 }

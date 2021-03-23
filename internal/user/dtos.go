@@ -54,3 +54,10 @@ type LatLng struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
 }
+
+type DriverWithVehicleReq struct {
+	CreateUserRequest
+	Model              string   `json:"model"`
+	RegistrationNo     string   `json:"registration_no"`
+	PermittedRideTypes []string `json:"permitted_ride_types"`
+}

@@ -1,6 +1,7 @@
 package customerTask
 
 import (
+	"github.com/atulsinha007/uber/internal/driverTask"
 	"github.com/atulsinha007/uber/pkg/log"
 	"github.com/atulsinha007/uber/pkg/postgres"
 	"github.com/spf13/viper"
@@ -22,10 +23,16 @@ func Init() {
 
 	customerTaskDao, err := NewDaoImpl(pgConf)
 	if err != nil {
-		log.L.With(zap.Error(err)).Fatal("error initializing customerTask dao")
+		log.L.With(zap.Error(err)).Fatal("error initializing customerTask customerTaskDao")
 	}
-	log.L.Info("customerTask dao initialized")
+	log.L.Info("customerTask customerTaskDao initialized")
 
-	customerTaskCtrl := NewCtrl(customerTaskDao)
+	driverTaskDao, err := driverTask.NewDaoImpl(pgConf)
+	if err != nil {
+		log.L.With(zap.Error(err)).Fatal("error initializing driverTask driverTaskDao")
+	}
+	log.L.Info("customerTask driverTaskDao initialized")
+
+	customerTaskCtrl := NewCtrl(customerTaskDao, driverTaskDao)
 	ApiHandler = NewHandler(customerTaskCtrl)
 }
