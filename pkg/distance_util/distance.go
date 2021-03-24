@@ -1,4 +1,4 @@
-package distanceUtil
+package distance_util
 
 import "math"
 

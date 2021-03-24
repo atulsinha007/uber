@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/atulsinha007/uber/internal/address"
-	"github.com/atulsinha007/uber/pkg/distanceUtil"
+	"github.com/atulsinha007/uber/pkg/distance_util"
 	"github.com/atulsinha007/uber/pkg/log"
 	"github.com/atulsinha007/uber/pkg/postgres"
 	_ "github.com/lib/pq"
@@ -196,7 +196,7 @@ func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRi
 		if err != nil {
 			return 0, 0, err
 		}
-		di := distanceUtil.Haversine(pickupLocation.Lat, pickupLocation.Lng, lat, lng)
+		di := distance_util.Haversine(pickupLocation.Lat, pickupLocation.Lng, lat, lng)
 		fmt.Println(driverId, lat, lng, di)
 		if di < dist {
 			nearestDriverId = driverId
