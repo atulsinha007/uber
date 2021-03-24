@@ -17,7 +17,6 @@ import (
 )
 
 type Dao interface {
-	GetDriverHistory(driverId int) ([]DriverHistoryResponse, error)
 	AcceptRideRequest(req AcceptRideReq) error
 	UpdateRide(req UpdateRideReq) error
 	GetFromDriverIdAndCustomerTaskId(customerTaskId, driverId int) (DriverTask, error)
@@ -36,33 +35,6 @@ func NewDaoImpl(conf postgres.PgConf) (*DaoImpl, error) {
 	}
 
 	return &DaoImpl{db: conn}, nil
-}
-
-func (d *DaoImpl) GetDriverHistory(driverId int) (resp []DriverHistoryResponse, err error) {
-	query := `select(payable_amount, distance, rating, status) from driver_task where driver_id=$1 order by created_at desc`
-
-	rows, err := d.db.Query(query, driverId)
-	if err != nil {
-		log.L.With(zap.Error(err), zap.Any("driverId", driverId)).Error("error getting driver history")
-		return nil, err
-	}
-	defer func() {
-		e := rows.Close()
-		if e != nil {
-			log.L.With(zap.Error(e)).Error("error getting driver history")
-		}
-	}()
-
-	for rows.Next() {
-		var row DriverHistoryResponse
-		if err = rows.Scan(&row.PayoutAmount, &row.DistanceCovered, &row.Rating, &row.Status); err != nil {
-			return
-		}
-
-		resp = append(resp, row)
-	}
-
-	return
 }
 
 func (d *DaoImpl) AcceptRideRequest(req AcceptRideReq) error {
@@ -135,7 +107,7 @@ func (d *DaoImpl) UpdateRide(req UpdateRideReq) error {
 
 	if req.Status == "COMPLETED" {
 		query = `update driver_profile set is_available=$1, updated_at=$2 where driver_id=$3;`
-		_, err = tx.Exec(query, false, time.Now().UTC(), driverId)
+		_, err = tx.Exec(query, true, time.Now().UTC(), driverId)
 		if err != nil {
 			log.L.With(zap.Error(err), zap.Any("req", req)).Error("error in updating is_available for driver")
 			tx.Rollback()
@@ -216,6 +188,7 @@ func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRi
 	dist := math.Inf(1)
 
 	for rows.Next() {
+		fmt.Println("here")
 		var lat, lng float64
 		var driverId int
 
@@ -223,11 +196,15 @@ func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRi
 		if err != nil {
 			return 0, 0, err
 		}
-		d := distanceUtil.Haversine(pickupLocation.Lat, pickupLocation.Lng, lat, lng)
-		if d < dist {
+		di := distanceUtil.Haversine(pickupLocation.Lat, pickupLocation.Lng, lat, lng)
+		fmt.Println(driverId, lat, lng, di)
+		if di < dist {
 			nearestDriverId = driverId
+			dist = di
 		}
 	}
+
+	fmt.Println(nearestDriverId, dist)
 
 	return nearestDriverId, dist, nil
 

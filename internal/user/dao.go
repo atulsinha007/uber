@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/atulsinha007/uber/pkg/log"
 	"github.com/atulsinha007/uber/pkg/postgres"
 	_ "github.com/lib/pq"
@@ -15,6 +16,7 @@ type Dao interface {
 	GetDriverProfile(driverId int) (DriverProfileResponse, error)
 	UpdateLocation(req UpdateCurrentLocationRequest) error
 	AddDriverWithVehicle(vehicleId string, user User) error
+	GetDriverHistory(driverId int) ([]DriverHistoryResponse, error)
 }
 
 type DaoImpl struct {
@@ -54,7 +56,7 @@ func (d *DaoImpl) GetDriverProfile(driverId int) (profile DriverProfileResponse,
 		return
 	}
 
-	query = "select count(*), avg(rating) from driver_task where driver_id=$1 and rating is not null and status='COMPLETED';"
+	query = "select count(*), avg(rating) from driver_task where driver_id=$1 and status='COMPLETED';"
 
 	var rating *float64
 	err = d.db.QueryRow(query, driverId).Scan(&profile.TotalRides, &rating)
@@ -100,4 +102,40 @@ func (d *DaoImpl) AddDriverWithVehicle(vehicleId string, user User) error {
 			Error("error creating driver with vehicle")
 	}
 	return err
+}
+
+func (d *DaoImpl) GetDriverHistory(driverId int) (resp []DriverHistoryResponse, err error) {
+	query := `select payable_amount, distance, rating, status from driver_task where driver_id=$1 order by created_at desc`
+
+	rows, err := d.db.Query(query, driverId)
+	if err != nil {
+		log.L.With(zap.Error(err), zap.Any("driverId", driverId)).Error("error getting driver history")
+		return nil, err
+	}
+	defer func() {
+		e := rows.Close()
+		if e != nil {
+			log.L.With(zap.Error(e)).Error("error getting driver history")
+		}
+	}()
+
+	var rating *int
+	for rows.Next() {
+		var row DriverHistoryResponse
+		if err = rows.Scan(&row.PayoutAmount, &row.DistanceCovered, &rating, &row.Status); err != nil {
+			return
+		}
+
+		if rating == nil {
+			row.Rating = 3
+		} else {
+			row.Rating = *rating
+		}
+
+		fmt.Println(row)
+
+		resp = append(resp, row)
+	}
+
+	return
 }

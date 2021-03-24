@@ -128,3 +128,28 @@ func (h *Handler) AddDriverWithVehicle(req *http.Request) handler.Response {
 		},
 	}
 }
+
+func (h *Handler) GetDriverHistory(req *http.Request) handler.Response {
+	driverId, ok := mux.Vars(req)["driverId"]
+	if !ok || driverId == "" {
+		return handler.BadRequest("invalid driverId")
+	}
+
+	id, _ := strconv.Atoi(driverId)
+	resp, err := h.ctrl.GetDriverHistory(id)
+	if err != nil {
+		return handler.Response{
+			Code: http.StatusInternalServerError,
+			Payload: handler.Fields{
+				"error": err.Error(),
+			},
+		}
+	}
+
+	return handler.Response{
+		Code: http.StatusCreated,
+		Payload: handler.Fields{
+			"data": resp,
+		},
+	}
+}

@@ -7,6 +7,7 @@ type Ctrl interface {
 	AddDriverWithVehicle(driverWithVehicleReq DriverWithVehicleReq) error
 	GetDriverProfile(driverId int) (DriverProfileResponse, error)
 	UpdateLocation(request UpdateCurrentLocationRequest) error
+	GetDriverHistory(driverId int) ([]DriverHistoryResponse, error)
 }
 
 type CtrlImpl struct {
@@ -41,4 +42,8 @@ func (c *CtrlImpl) GetDriverProfile(driverId int) (DriverProfileResponse, error)
 
 func (c *CtrlImpl) UpdateLocation(request UpdateCurrentLocationRequest) error {
 	return c.dao.UpdateLocation(request)
+}
+
+func (c *CtrlImpl) GetDriverHistory(driverId int) ([]DriverHistoryResponse, error) {
+	return c.dao.GetDriverHistory(driverId)
 }

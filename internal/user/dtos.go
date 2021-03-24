@@ -33,7 +33,6 @@ type DriverHistoryRequest struct {
 }
 
 type DriverHistoryResponse struct {
-	RideId          int
 	Status          string
 	DistanceCovered float64
 	Rating          int
