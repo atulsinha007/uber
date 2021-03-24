@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS driver_task
     created_at       timestamp with time zone                            NOT NULL DEFAULT now(),
     updated_at       timestamp with time zone                            NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS driver_task_driver_id_status_idx on driver_task (driver_id, status);
+CREATE INDEX IF NOT EXISTS driver_task_customer_task_id_idx on driver_task (customer_task_id);
