@@ -8,3 +8,5 @@ CREATE TABLE IF NOT EXISTS customer_task
     created_at     timestamp with time zone                         NOT NULL DEFAULT now(),
     updated_at     timestamp with time zone                         NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS customer_task_customer_id_status_idx on customer_task (customer_id, status);
