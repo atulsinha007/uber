@@ -9,4 +9,3 @@ CREATE TABLE IF NOT EXISTS driver_profile
 );
 
 CREATE INDEX IF NOT EXISTS driver_profile_vehicle_id_idx on driver_profile (vehicle_id);
-CREATE INDEX IF NOT EXISTS driver_profile_driver_id_idx on driver_profile (driver_id);
