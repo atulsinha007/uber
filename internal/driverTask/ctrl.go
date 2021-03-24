@@ -1,7 +1,6 @@
 package driverTask
 
 type Ctrl interface {
-	GetDriverHistory(driverId int) ([]DriverHistoryResponse, error)
 	AcceptRideRequest(req AcceptRideReq) error
 	UpdateRide(req UpdateRideReq) error
 }
@@ -12,10 +11,6 @@ type CtrlImpl struct {
 
 func NewCtrl(dao Dao) *CtrlImpl {
 	return &CtrlImpl{dao: dao}
-}
-
-func (c *CtrlImpl) GetDriverHistory(driverId int) ([]DriverHistoryResponse, error) {
-	return c.dao.GetDriverHistory(driverId)
 }
 
 func (c *CtrlImpl) AcceptRideRequest(req AcceptRideReq) error {

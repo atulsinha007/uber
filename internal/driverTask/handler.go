@@ -16,31 +16,6 @@ func NewHandler(ctrl Ctrl) *Handler {
 	return &Handler{ctrl: ctrl}
 }
 
-func (h *Handler) GetDriverHistory(req *http.Request) handler.Response {
-	driverId, ok := mux.Vars(req)["driverId"]
-	if !ok || driverId == "" {
-		return handler.BadRequest("invalid driverId")
-	}
-
-	id, _ := strconv.Atoi(driverId)
-	resp, err := h.ctrl.GetDriverHistory(id)
-	if err != nil {
-		return handler.Response{
-			Code: http.StatusInternalServerError,
-			Payload: handler.Fields{
-				"error": err.Error(),
-			},
-		}
-	}
-
-	return handler.Response{
-		Code: http.StatusCreated,
-		Payload: handler.Fields{
-			"data": resp,
-		},
-	}
-}
-
 func (h *Handler) AcceptRideRequest(req *http.Request) handler.Response {
 	driverTaskId, ok := mux.Vars(req)["driverTaskId"]
 	if !ok || driverTaskId == "" {
@@ -100,7 +75,7 @@ func (h *Handler) UpdateRide(req *http.Request) handler.Response {
 	return handler.Response{
 		Code: http.StatusCreated,
 		Payload: handler.Fields{
-			"data": "ride accepted successfully",
+			"data": "ride updated successfully",
 		},
 	}
 }

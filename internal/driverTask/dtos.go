@@ -1,13 +1,5 @@
 package driverTask
 
-type DriverHistoryResponse struct {
-	RideId          int     `json:"ride_id"`
-	Status          string  `json:"status"`
-	DistanceCovered float64 `json:"distance_covered"`
-	Rating          int     `json:"rating"`
-	PayoutAmount    float64 `json:"payout_amount"`
-}
-
 type AcceptRideReq struct {
 	DriverTaskId   int `json:"driver_task_id"`
 	DriverId       int `json:"driver_id"`

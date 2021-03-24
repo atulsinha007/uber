@@ -8,8 +8,9 @@ import (
 func GetEndpoints() []server.Endpoint {
 	return []server.Endpoint{
 		{Path: "/user", Method: "POST", Handler: user.ApiHandler.CreateUser},
-		{Path: "/driver/{driverId}", Method: "GET", Handler: user.ApiHandler.GetDriverProfile},
-		{Path: "/user/{userId}/location", Method: "PATCH", Handler: user.ApiHandler.UpdateLocation},
 		{Path: "/driver", Method: "POST", Handler: user.ApiHandler.AddDriverWithVehicle},
+		{Path: "/driver/{driverId}", Method: "GET", Handler: user.ApiHandler.GetDriverProfile},
+		{Path: "/driver/{driverId}/history", Method: "GET", Handler: user.ApiHandler.GetDriverHistory},
+		{Path: "/user/{userId}/location", Method: "PATCH", Handler: user.ApiHandler.UpdateLocation},
 	}
 }
