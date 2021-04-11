@@ -1,11 +1,11 @@
 package server
 
 import (
+	"github.com/atulsinha007/uber/config"
 	handler "github.com/atulsinha007/uber/pkg/http-wrapper"
 	"github.com/atulsinha007/uber/pkg/log"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -28,8 +28,8 @@ type Endpoint struct {
 var sc serverConfig
 
 func Init() {
-	serviceName := viper.GetString("SERVICE_NAME")
-	port := viper.GetString("SERVICE_PORT")
+	serviceName := config.V.GetString("SERVICE_NAME")
+	port := config.V.GetString("SERVICE_PORT")
 
 	if serviceName == "" {
 		log.L.Fatal("Mandatory config SERVICE_NAME missing")
@@ -39,8 +39,8 @@ func Init() {
 		log.L.Fatal("Mandatory config SERVICE_PORT missing")
 	}
 
-	readTimeout := viper.GetInt64("READ_TIMEOUT_MILLIS")
-	writeTimeout := viper.GetInt64("WRITE_TIMEOUT_MILLIS")
+	readTimeout := config.V.GetInt64("READ_TIMEOUT_MILLIS")
+	writeTimeout := config.V.GetInt64("WRITE_TIMEOUT_MILLIS")
 
 	if readTimeout == 0 {
 		log.L.Warn("missing READ_TIMEOUT_MILLIS config")

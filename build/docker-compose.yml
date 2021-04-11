@@ -1,0 +1,35 @@
+version: "3"
+
+networks:
+  uber_network:
+    driver: bridge
+
+services:
+  uber:
+    container_name: uber
+    build:
+      context: ..
+      dockerfile: ./build/Dockerfile.test
+    environment:
+      ENV: local
+      PG_HOST: uber-pg
+      BASE_CONFIG_PATH: /go/src/github.com/dunzoit/uber/config
+    depends_on:
+      - uber-pg
+    networks:
+      - uber_network
+    restart: "no"
+
+  uber-pg:
+    image: postgres:latest
+    container_name: uber-pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+    networks:
+      - uber_network
+    restart: always

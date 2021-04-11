@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+//go:generate mockgen -destination=mock_dao.go -package=customerTask -source=./dao.go
 type Dao interface {
 	CreateRide(createRideReq CreateRideRequest) (int, error)
 	UpdateRide(req UpdateRideReq) error

@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var V *viper.Viper
+
 const (
 	EnvKey      = "ENV"
 	configFile  = "system"
@@ -19,17 +21,20 @@ var environments = map[string]bool{
 	"local": true,
 }
 
-func SetUpEnv() {
-	err := viper.BindEnv(EnvKey)
+func init() {
+	V = viper.New()
+	err := V.BindEnv(EnvKey)
 	if err != nil {
 		log.L.Fatal("ENV load failed")
 	}
 
-	envName := strings.ToLower(viper.GetString(EnvKey))
+	envName := strings.ToLower(V.GetString(EnvKey))
 	log.L.With(zap.String("env", envName)).Info("env set")
 	if _, ok := environments[envName]; !ok {
 		log.L.With(zap.String("env", envName)).Fatal("invalid ENV variable")
 	}
+
+	V.AutomaticEnv()
 
 	err = loadConfigFile(envName)
 
@@ -42,8 +47,8 @@ func loadConfigFile(envName string) error {
 	basePath := defaultPath
 	basePath = filepath.Join(basePath, envName)
 
-	viper.AddConfigPath(basePath)
-	viper.SetConfigName(configFile)
-	viper.SetConfigType(configType)
-	return viper.ReadInConfig()
+	V.AddConfigPath(basePath)
+	V.SetConfigName(configFile)
+	V.SetConfigType(configType)
+	return V.ReadInConfig()
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/atulsinha007/uber/pkg/log"
+	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 )
 

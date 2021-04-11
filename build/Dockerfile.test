@@ -1,0 +1,8 @@
+FROM golang:1.15
+
+# Set working directory
+COPY . /go/src/github.com/atulsinha007/uber/
+WORKDIR /go/src/github.com/atulsinha007/uber/
+
+# Run tests
+CMD make test

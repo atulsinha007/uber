@@ -10,6 +10,7 @@ import (
 )
 
 // CREATED -> ONGOING -> CANCELLED/COMPLETED
+//go:generate mockgen -destination=mock_ctrl.go -package=customerTask -source=./ctrl.go
 type Ctrl interface {
 	CreateRide(createRideReq CreateRideRequest) (CreateRideResponseOnDriverAcceptance, error)
 	UpdateRide(req UpdateRideReq) error

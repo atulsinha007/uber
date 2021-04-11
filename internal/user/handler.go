@@ -67,7 +67,6 @@ func (h *Handler) GetDriverProfile(req *http.Request) handler.Response {
 	}
 }
 
-
 func (h *Handler) UpdateLocation(req *http.Request) handler.Response {
 	userId, ok := mux.Vars(req)["userId"]
 	if !ok || userId == "" {

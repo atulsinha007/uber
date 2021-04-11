@@ -21,6 +21,11 @@ func (h *Handler) CreateVehicle(req *http.Request) handler.Response {
 		return handler.BadRequest("invalid payload")
 	}
 
+	err = payload.Validate()
+	if err != nil {
+		return handler.BadRequest(err.Error())
+	}
+
 	err = h.ctrl.CreateVehicle(payload)
 	if err != nil {
 		return handler.Response{

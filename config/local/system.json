@@ -4,7 +4,7 @@
 
   "PG_HOST": "localhost",
   "PG_PORT": "5432",
-  "PG_USERNAME": "local",
-  "PG_PASSWORD": "local",
+  "PG_USERNAME": "postgres",
+  "PG_PASSWORD": "postgres",
   "PG_DB_NAME": "uber"
 }

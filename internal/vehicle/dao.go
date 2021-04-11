@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate mockgen -destination=mock_dao.go -package=vehicle -source=./dao.go
 type Dao interface {
 	CreateVehicle(request CreateVehicleRequest) (string, error)
 }
@@ -28,7 +29,7 @@ func (d *DaoImpl) CreateVehicle(request CreateVehicleRequest) (string, error) {
 	tx, err := d.db.Begin()
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("createRideReq", request)).
-			Error("error creating customer task")
+			Error("error creating vehicle")
 		return "", err
 	}
 
@@ -45,6 +46,7 @@ func (d *DaoImpl) CreateVehicle(request CreateVehicleRequest) (string, error) {
 	if err != nil {
 		log.L.With(zap.Error(err), zap.Any("req", request)).Error("error in inserting vehicle")
 		tx.Rollback()
+		return "", err
 	}
 
 	query = `insert into vehicle_ride_type_mapping(vehicle_id, ride_type) values($1, $2);`
@@ -55,6 +57,7 @@ func (d *DaoImpl) CreateVehicle(request CreateVehicleRequest) (string, error) {
 			log.L.With(zap.Error(err), zap.Any("req", request)).
 				Error("error in inserting vehicleRideTypeMapping")
 			tx.Rollback()
+			return "", err
 		}
 	}
 
