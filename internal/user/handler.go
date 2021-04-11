@@ -146,7 +146,7 @@ func (h *Handler) GetDriverHistory(req *http.Request) handler.Response {
 	}
 
 	return handler.Response{
-		Code: http.StatusCreated,
+		Code: http.StatusOK,
 		Payload: handler.Fields{
 			"data": resp,
 		},
