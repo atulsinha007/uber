@@ -32,7 +32,7 @@ modules.
 4. The whole project is written in a very organized MVC based pattern incorporating the handler-controller-dao layers.
 
 # How to run the project:
-1. Change directory to the root of the project, i.e, `~/.../uber`.
+1. Clone the repository and change directory to the root of the project, i.e, `~/.../uber`.
 2. Run: `make docker-build`.  This command starts the services in docker-compose. 
 3. Run: `make migrate_up`. This command applies the migrations.
 4. Use the API collection present in `resources/uber.postman_collection.json` to verify the APIs. This json file can 
