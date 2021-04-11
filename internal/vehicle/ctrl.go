@@ -1,5 +1,6 @@
 package vehicle
 
+//go:generate mockgen -destination=mock_ctrl.go -package=vehicle -source=./ctrl.go
 type Ctrl interface {
 	CreateVehicle(req CreateVehicleRequest) error
 }

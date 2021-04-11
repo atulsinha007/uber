@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+//go:generate mockgen -destination=mock_dao.go -package=user -source=./dao.go
 type Dao interface {
 	Set(user User) (string, error)
 	GetDriverProfile(driverId int) (DriverProfileResponse, error)

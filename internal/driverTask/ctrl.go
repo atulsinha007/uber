@@ -1,5 +1,6 @@
 package driverTask
 
+//go:generate mockgen -destination=mock_ctrl.go -package=driverTask -source=./ctrl.go
 type Ctrl interface {
 	AcceptRideRequest(req AcceptRideReq) error
 	UpdateRide(req UpdateRideReq) error

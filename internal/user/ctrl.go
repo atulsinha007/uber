@@ -2,6 +2,7 @@ package user
 
 import "github.com/atulsinha007/uber/internal/vehicle"
 
+//go:generate mockgen -destination=mock_ctrl.go -package=user -source=./ctrl.go
 type Ctrl interface {
 	AddUser(user User) error
 	AddDriverWithVehicle(driverWithVehicleReq DriverWithVehicleReq) error
