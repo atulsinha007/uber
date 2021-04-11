@@ -48,20 +48,6 @@ func (mr *MockCtrlMockRecorder) CreateRide(createRideReq interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRide", reflect.TypeOf((*MockCtrl)(nil).CreateRide), createRideReq)
 }
 
-// UpdateRide mocks base method
-func (m *MockCtrl) UpdateRide(req UpdateRideReq) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRide", req)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateRide indicates an expected call of UpdateRide
-func (mr *MockCtrlMockRecorder) UpdateRide(req interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRide", reflect.TypeOf((*MockCtrl)(nil).UpdateRide), req)
-}
-
 // CancelRide mocks base method
 func (m *MockCtrl) CancelRide(customerTaskId int) error {
 	m.ctrl.T.Helper()

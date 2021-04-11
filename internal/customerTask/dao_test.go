@@ -46,10 +46,24 @@ func (suite *DaoTestSuite) BeforeTest(suiteName, testName string) {
 	suite.dao, err = NewDaoImpl(conf)
 	suite.Nil(err)
 
-	stmt := `delete from vehicle`
-	_, err = suite.dao.db.Exec(stmt)
-	if err != nil {
-		log.L.With(zap.Error(err), zap.String("stmt", stmt)).Fatal("unable to delete")
+	stmts := []string{
+		`delete from customer_task`,
+		`delete from users`,
+		`alter sequence users_user_id_seq RESTART WITH 1`,
+		`insert into users(first_name, last_name, phone, user_type) values($1, $2, $3, $4)`,
+	}
+	args := [][]interface{}{
+		{},
+		{},
+		{},
+		{"atul", "sinha", "123", "customer"},
+	}
+
+	for i := range stmts {
+		_, err = suite.dao.db.Exec(stmts[i], args[i]...)
+		if err != nil {
+			log.L.With(zap.Error(err), zap.String("stmt", stmts[i])).Fatal("unable to delete")
+		}
 	}
 }
 
@@ -79,17 +93,39 @@ func TestDaoTestSuite(t *testing.T) {
 }
 
 func (suite *DaoTestSuite) Test_CreateRide() {
-
+	req := getCreateRideRequest()
+	_, err := suite.dao.CreateRide(req)
+	suite.Nil(err)
 }
 
 func (suite *DaoTestSuite) Test_CancelRide() {
+	req := getCreateRideRequest()
+	id, err := suite.dao.CreateRide(req)
+	suite.Nil(err)
 
+	err = suite.dao.CancelRide(id)
+	suite.Nil(err)
 }
 
 func (suite *DaoTestSuite) Test_GetHistory() {
-
+	_, err := suite.dao.GetHistory(1)
+	suite.Nil(err)
 }
 
 func (suite *DaoTestSuite) Test_GetRideDetails() {
+	req := getCreateRideRequest()
+	id, err := suite.dao.CreateRide(req)
+	suite.Nil(err)
 
+	expDetails := CustomerTask{
+		CustomerTaskId: id,
+		CustomerId:     req.CustomerId,
+		Status:         "CREATED",
+		PayableAmount:  req.PayableAmount,
+		RideType:       req.PreferredRideType,
+	}
+
+	details, err := suite.dao.GetRideDetails(id)
+	suite.Nil(err)
+	suite.Equal(expDetails, details)
 }

@@ -14,7 +14,7 @@ test-cover:
 
 docker-test:
 	docker-compose -f ./build/docker-compose.yml up --build --exit-code-from uber
-	docker-compose -f ./build/docker-compose.yml down --volumes
+	#docker-compose -f ./build/docker-compose.yml down --volumes
 
 
 docker-test-coverage:

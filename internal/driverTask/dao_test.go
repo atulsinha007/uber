@@ -45,7 +45,7 @@ func (suite *DaoTestSuite) BeforeTest(suiteName, testName string) {
 	suite.dao, err = NewDaoImpl(conf)
 	suite.Nil(err)
 
-	stmt := `delete from vehicle`
+	stmt := `delete from driver_task`
 	_, err = suite.dao.db.Exec(stmt)
 	if err != nil {
 		log.L.With(zap.Error(err), zap.String("stmt", stmt)).Fatal("unable to delete")
