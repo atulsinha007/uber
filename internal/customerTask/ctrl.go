@@ -13,7 +13,6 @@ import (
 //go:generate mockgen -destination=mock_ctrl.go -package=customerTask -source=./ctrl.go
 type Ctrl interface {
 	CreateRide(createRideReq CreateRideRequest) (CreateRideResponseOnDriverAcceptance, error)
-	UpdateRide(req UpdateRideReq) error
 	CancelRide(customerTaskId int) error
 	GetHistory(customerId int) ([]CustomerHistoryResponse, error)
 	AssignNearestDriver(customerTaskId int, pickupLocation address.Location, preferredRideType string) (int, error)
@@ -85,10 +84,6 @@ func (c *CtrlImpl) checkIfDriverAccepted(customerTaskId, driverId int, pickupLoc
 		PickupLocation: pickupLoc,
 		ETA:            100, // some algorithm should decide ETA
 	}
-}
-
-func (c *CtrlImpl) UpdateRide(req UpdateRideReq) error {
-	return c.customerTaskDao.UpdateRide(req)
 }
 
 func (c *CtrlImpl) CancelRide(customerTaskId int) error {

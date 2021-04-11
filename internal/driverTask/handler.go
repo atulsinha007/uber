@@ -73,7 +73,7 @@ func (h *Handler) UpdateRide(req *http.Request) handler.Response {
 	}
 
 	return handler.Response{
-		Code: http.StatusCreated,
+		Code: http.StatusOK,
 		Payload: handler.Fields{
 			"data": "ride updated successfully",
 		},

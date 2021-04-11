@@ -14,7 +14,6 @@ import (
 //go:generate mockgen -destination=mock_dao.go -package=customerTask -source=./dao.go
 type Dao interface {
 	CreateRide(createRideReq CreateRideRequest) (int, error)
-	UpdateRide(req UpdateRideReq) error
 	CancelRide(customerTaskId int) error
 	GetHistory(customerId int) ([]CustomerHistoryResponse, error)
 	GetRideDetails(customerTaskId int) (CustomerTask, error)
@@ -96,10 +95,6 @@ func (d *DaoImpl) createRideStops(customerTaskId int, pickupLocId, dropLocId str
 	}
 
 	return err
-}
-
-func (d *DaoImpl) UpdateRide(req UpdateRideReq) error {
-	return nil
 }
 
 func (d *DaoImpl) CancelRide(customerTaskId int) error {

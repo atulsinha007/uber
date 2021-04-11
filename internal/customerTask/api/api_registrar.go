@@ -8,7 +8,6 @@ import (
 func GetEndpoints() []server.Endpoint {
 	return []server.Endpoint{
 		{Path: "/customerTask", Method: "POST", Handler: customerTask.ApiHandler.CreateRideRequest},
-		{Path: "/customerTask/{customerTaskId}", Method: "PATCH", Handler: customerTask.ApiHandler.UpdateRideStops},
 		{Path: "/customerTask/{customerTaskId}", Method: "DELETE", Handler: customerTask.ApiHandler.CancelRide},
 		{Path: "/customerTask/{customerId}/history", Method: "GET", Handler: customerTask.ApiHandler.GetCustomerHistory},
 	}
