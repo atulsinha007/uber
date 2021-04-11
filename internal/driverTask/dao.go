@@ -189,7 +189,6 @@ func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRi
 	dist := math.Inf(1)
 
 	for rows.Next() {
-		fmt.Println("here")
 		var lat, lng float64
 		var driverId int
 
@@ -198,7 +197,7 @@ func (d *DaoImpl) FindNearestDriver(pickupLocation address.Location, preferredRi
 			return 0, 0, err
 		}
 		di := distance_util.Haversine(pickupLocation.Lat, pickupLocation.Lng, lat, lng)
-		fmt.Println(driverId, lat, lng, di)
+		fmt.Println("found driver: ", driverId, lat, lng, di)
 		if di < dist {
 			nearestDriverId = driverId
 			dist = di

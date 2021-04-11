@@ -13,8 +13,8 @@ test-cover:
 
 
 docker-test:
-	docker-compose -f ./build/docker-compose.yml up --build --exit-code-from uber
-	docker-compose -f ./build/docker-compose.yml down --volumes
+	docker-compose -f ./build/docker-compose.test.yml up --build --exit-code-from uber
+	docker-compose -f ./build/docker-compose.test.yml down --volumes
 
 
 docker-test-coverage:
@@ -22,7 +22,12 @@ docker-test-coverage:
 
 
 end-test:
-	COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f ./build/docker-compose.yml down --volumes
+	COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f ./build/docker-compose.test.yml down --volumes
+
+
+docker-build:
+	docker-compose -f ./build/docker-compose.yml up --build --exit-code-from uber
+	docker-compose -f ./build/docker-compose.yml down --volumes
 
 
 migrate_up:

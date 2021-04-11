@@ -1,0 +1,282 @@
+{
+	"info": {
+		"_postman_id": "2f0b3e32-7433-4170-b657-4d413461415b",
+		"name": "uber",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first_name\": \"Raghav\",\n    \"last_name\": \"Khandelwal\",\n    \"phone\": \"8789159625\",\n    \"type\": \"customer\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/user",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create driver with vehicle",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"model\": \"model1\",\n    \"registration_no\": \"registration_no1\",\n    \"permitted_ride_types\": [\n        \"MINI\",\n        \"MICRO\",\n        \"SEDAN\"\n    ],\n    \"first_name\": \"Atul1\",\n    \"last_name\": \"Sinha1\",\n    \"phone\": \"8789159624\",\n    \"type\": \"driver\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/driver",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"driver"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update location",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"lat\": 12.001,\n    \"lng\": 77.010\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/user/2/location",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"2",
+						"location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "driver profile",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/driver/2",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"driver",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "customer history",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/customerTask/1/history",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"customerTask",
+						"1",
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create customerTask",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customer_id\": 1,\n    \"payable_amount\": 40,\n    \"pickup_location\": {\n        \"lat\": 12,\n        \"lng\": 77,\n        \"name\": \"name1\",\n        \"street_name\": \"street_name1\",\n        \"landmark\": \"landmark1\",\n        \"city\": \"bangalore\",\n        \"country\": \"india\"\n    },\n    \"drop_location\": {\n        \"lat\": 12.1,\n        \"lng\": 77.1,\n        \"name\": \"name2\",\n        \"street_name\": \"street_name2\",\n        \"landmark\": \"landmark2\",\n        \"city\": \"bangalore\",\n        \"country\": \"india\"\n    },\n    \"preferred_ride_type\": \"MICRO\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/customerTask",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"customerTask"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cancel customerTask",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/customerTask/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"customerTask",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create vehicle",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"model\": \"model1\",\n    \"registration_no\": \"registration_no1\",\n    \"permitted_ride_types\": [\n        \"MINI\",\n        \"MICRO\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/vehicle",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"vehicle"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "accept ride request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"driver_id\": 2,\n    \"customer_task_id\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/driverTask/1/accept",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"driverTask",
+						"1",
+						"accept"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update driver task",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"status\": \"COMPLETED\",\n    \"customer_task_id\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/driverTask/1/update",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"driverTask",
+						"1",
+						"update"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
