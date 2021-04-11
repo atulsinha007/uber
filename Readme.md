@@ -35,7 +35,7 @@ How to run the project:
 1. Change directory to the root of the project, i.e, `~/.../uber`.
 2. Run: `make docker-build`.  This command starts the services in docker-compose. 
 3. Run `make migrate_up`. This command applies the migrations.
-4. Using the API collection present in `resources/uber.postman_collection.json` to verify the APIs. This json file can 
+4. Use the API collection present in `resources/uber.postman_collection.json` to verify the APIs. This json file can 
 be directly imported in the postman app.
 
 How to run tests:
