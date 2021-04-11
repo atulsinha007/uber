@@ -9,13 +9,11 @@ services:
     container_name: uber
     build:
       context: ..
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./build/Dockerfile.test
     environment:
       ENV: local
       PG_HOST: uber-pg
       BASE_CONFIG_PATH: /go/src/github.com/dunzoit/uber/config
-    ports:
-      - 8000:8000
     depends_on:
       - uber-pg
     networks:

@@ -44,6 +44,8 @@ func (c *CtrlImpl) CreateRide(req CreateRideRequest) (resp CreateRideResponseOnD
 				Error("error finding nearest driver")
 			continue
 		}
+
+		log.L.With(zap.Any("req", req), zap.Int("driverId", driverId)).Info("driver assigned")
 		assigned = true
 		break
 	}
@@ -57,6 +59,7 @@ func (c *CtrlImpl) CreateRide(req CreateRideRequest) (resp CreateRideResponseOnD
 		time.Sleep(time.Second)
 		accepted, resp = c.checkIfDriverAccepted(customerTaskId, driverId, req.PickupLocation)
 		if accepted {
+			log.L.With(zap.Any("req", req), zap.Int("driverId", driverId)).Info("driver accepted")
 			break
 		}
 	}
