@@ -1,5 +1,5 @@
 # About the project:
-The details of the project can be found [here](resources/uber.pdf).
+The problem statement of the project can be found [here](resources/uber.pdf).
 
 # How to read the project:
 1. The entrypoint of the project is `cmd/main.go`.
