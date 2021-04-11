@@ -83,7 +83,7 @@ func (suite *DaoTestSuite) Test_Set() {
 	suite.Nil(err)
 }
 
-func (suite *DaoTestSuite) Test_GetDriverProfile() { // complete this with dummy data
+func (suite *DaoTestSuite) Test_GetDriverProfile() { // TODO: complete this by adding dummy data
 	_, err := suite.dao.GetDriverProfile(1)
 	suite.NotNil(err)
 }
@@ -94,10 +94,10 @@ func (suite *DaoTestSuite) Test_UpdateLocation() {
 	suite.Nil(err)
 }
 
-func (suite *DaoTestSuite) Test_AddDriverWithVehicle() {  // complete this with dummy data
+func (suite *DaoTestSuite) Test_AddDriverWithVehicle() {  // TODO: complete this by adding dummy data
 
 }
 
-func (suite *DaoTestSuite) Test_GetDriverHistory() { // complete this with dummy data
+func (suite *DaoTestSuite) Test_GetDriverHistory() { // TODO: complete this by adding dummy data
 
 }
