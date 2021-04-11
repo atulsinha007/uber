@@ -14,5 +14,5 @@ run_tests () {
   }
 }
 
-EXPECTED_COV=82 run_tests docker-test
+EXPECTED_COV=55 run_tests docker-test
 make end-test

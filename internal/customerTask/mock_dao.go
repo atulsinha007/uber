@@ -47,20 +47,6 @@ func (mr *MockDaoMockRecorder) CreateRide(createRideReq interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRide", reflect.TypeOf((*MockDao)(nil).CreateRide), createRideReq)
 }
 
-// UpdateRide mocks base method
-func (m *MockDao) UpdateRide(req UpdateRideReq) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRide", req)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateRide indicates an expected call of UpdateRide
-func (mr *MockDaoMockRecorder) UpdateRide(req interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRide", reflect.TypeOf((*MockDao)(nil).UpdateRide), req)
-}
-
 // CancelRide mocks base method
 func (m *MockDao) CancelRide(customerTaskId int) error {
 	m.ctrl.T.Helper()

@@ -61,7 +61,7 @@ func (h *Handler) CancelRide(req *http.Request) handler.Response {
 	}
 
 	return handler.Response{
-		Code: http.StatusCreated,
+		Code: http.StatusOK,
 		Payload: handler.Fields{
 			"data": "ride cancelled successfully",
 		},
@@ -95,7 +95,7 @@ func (h *Handler) GetCustomerHistory(req *http.Request) handler.Response {
 	}
 
 	return handler.Response{
-		Code: http.StatusCreated,
+		Code: http.StatusOK,
 		Payload: handler.Fields{
 			"data": resp,
 		},
