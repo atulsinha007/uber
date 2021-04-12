@@ -21,7 +21,7 @@ objects.
 modules.
 
 # What's not so good about the project:
-1. Test coverage is not great ~ 55-60%. Since the project was large.
+1. Test coverage is not great ~ 55-60%.
 2. Some validations are missing.
 3. TODOs and comments need addressing.
 
